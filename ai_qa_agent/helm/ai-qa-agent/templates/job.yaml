@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "ai-qa-agent.fullname" . }}-pipeline
+  labels:
+    {{- include "ai-qa-agent.labels" . | nindent 4 }}
+spec:
+  schedule: "0 2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pipeline
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command: ["python", "-m", "ai_qa_agent.main"]
+              env:
+                - name: AI_QA_CLIENT
+                  value: {{ .Values.config.client | quote }}
+                - name: AI_QA_OPENAI_BASE_URL
+                  value: {{ .Values.config.openai_base_url | quote }}
+                - name: AI_QA_OPENAI_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.secrets.name }}
+                      key: openai-api-key
+                      optional: true
+                - name: AI_QA_OPENAI_MODEL
+                  value: {{ .Values.config.openai_model | quote }}
+                - name: AI_QA_ANTHROPIC_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.secrets.name }}
+                      key: anthropic-api-key
+                  optional: true
+                - name: AI_QA_ANTHROPIC_MODEL
+                  value: {{ .Values.config.anthropic_model | quote }}
+                - name: AI_QA_NUM_WORKERS
+                  value: {{ .Values.config.num_workers | quote }}
+                - name: AI_QA_LOG_LEVEL
+                  value: {{ .Values.config.log_level | quote }}
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}

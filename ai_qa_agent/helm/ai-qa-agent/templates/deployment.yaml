@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ai-qa-agent.fullname" . }}
+  labels:
+    {{- include "ai-qa-agent.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ai-qa-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ai-qa-agent.selectorLabels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["uvicorn", "ai_qa_agent.api:app", "--host", "0.0.0.0", "--port", "8000"]
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          env:
+            - name: AI_QA_CLIENT
+              value: {{ .Values.config.client | quote }}
+            - name: AI_QA_OPENAI_BASE_URL
+              value: {{ .Values.config.openai_base_url | quote }}
+            - name: AI_QA_OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.name }}
+                  key: openai-api-key
+                  optional: true
+            - name: AI_QA_OPENAI_MODEL
+              value: {{ .Values.config.openai_model | quote }}
+            - name: AI_QA_ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.name }}
+                  key: anthropic-api-key
+                  optional: true
+            - name: AI_QA_ANTHROPIC_MODEL
+              value: {{ .Values.config.anthropic_model | quote }}
+            - name: AI_QA_NUM_WORKERS
+              value: {{ .Values.config.num_workers | quote }}
+            - name: AI_QA_LOG_LEVEL
+              value: {{ .Values.config.log_level | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

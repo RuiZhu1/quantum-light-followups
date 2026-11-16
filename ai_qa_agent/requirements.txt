@@ -1,0 +1,18 @@
+# Runtime dependencies for the AI QA Agent.
+# For a complete install with web, dev, and test tools, use:
+#   pip install -e ".[dev,web]"
+
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.7
+pytest>=7.0
+pytest-xdist>=3.0
+pytest-json-report>=1.5
+openai>=1.0
+anthropic>=0.30
+pydantic>=2.0
+pydantic-settings>=2.0
+tenacity>=8.0
+structlog>=24.0
+fastapi>=0.100
+uvicorn[standard]>=0.23
