@@ -1,0 +1,6 @@
+generated_tests/*
+!generated_tests/.gitkeep
+report.md
+venv/
+__pycache__/
+*.pyc

@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments and local env files
+venv/
+.env/
+.env
+.env.local
+
+# Generated artifacts
+ai_qa_agent/generated_tests/*.py
+ai_qa_agent/report.md
+
+# Terraform
+ai_qa_agent/terraform/.terraform/
+ai_qa_agent/terraform/*.tfstate
+ai_qa_agent/terraform/*.tfstate.*
+ai_qa_agent/terraform/*.tfvars
+
+# Coverage
+coverage.xml
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,50 @@
+replicaCount: 1
+
+image:
+  repository: ai-qa-agent
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ai-qa-agent.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# LLM provider configuration.
+config:
+  client: placeholder
+  openai_base_url: ""
+  openai_model: gpt-4o-mini
+  anthropic_model: claude-3-5-sonnet-20241022
+  num_workers: 2
+  log_level: INFO
+
+# API keys are injected via a Kubernetes Secret named "llm-api-keys".
+secrets:
+  name: llm-api-keys

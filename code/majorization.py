@@ -94,14 +94,30 @@ def sort_desc(v: np.ndarray) -> np.ndarray:
 
 
 def lorenz(v: np.ndarray) -> np.ndarray:
-    # REQUIRED: return decreasing-order partial sums without a leading zero.
-    raise NotImplementedError("Milestone 1: implement Lorenz partial sums")
+    """Return decreasing-order partial sums of `v` along the last axis.
+
+    The Lorenz curve of a probability vector is the sequence of partial sums
+    of its entries sorted from largest to smallest. No leading zero is included.
+    """
+    return np.cumsum(sort_desc(v), axis=-1)
 
 
 def is_majorized(x: np.ndarray, y: np.ndarray, tol: float = 1e-10) -> bool:
-    # REQUIRED: compare equal totals and all partial sums, with documented tolerance.
-    # OPEN: choose a robust floating-point comparison and explain it.
-    raise NotImplementedError("Milestone 1: implement the majorization test")
+    r"""Return True if `x` is majorized by `y`, i.e. x \prec y.
+
+    Checks that the totals are equal and that every decreasing partial sum of
+    `x` is at most the corresponding partial sum of `y`, within `tol`.
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if x.shape != y.shape:
+        return False
+    total_diff = float(np.abs(np.sum(x, axis=-1) - np.sum(y, axis=-1)).max())
+    if total_diff > tol:
+        return False
+    lx = lorenz(x)
+    ly = lorenz(y)
+    return bool(np.all(lx <= ly + tol))
 
 
 def least_concave_majorant(partial_sums: np.ndarray) -> np.ndarray:
@@ -116,9 +132,17 @@ def lattice_supremum(vectors: np.ndarray) -> np.ndarray:
 
 
 def shannon(v: np.ndarray, axis: int = -1) -> np.ndarray:
-    # REQUIRED: define 0 log 0 = 0 and document whether total mass must equal 1.
-    # THINK: why is the same entropy functional used for a direct sum of mass 2?
-    raise NotImplementedError("Milestone 1: implement Shannon entropy")
+    r"""Shannon entropy H(v) = -\sum_i v_i log(v_i), with 0 log 0 = 0.
+
+    The input need not sum to 1; the functional is applied elementwise and
+    summed along `axis`. This is useful for both probability vectors and for
+    direct-sum vectors whose total mass may be 2.
+    """
+    v = np.asarray(v, dtype=float)
+    # Compute log only for positive entries to avoid divide-by-zero warnings.
+    safe = np.where(v > 0, v, 1.0)
+    terms = np.where(v > 0, v * np.log(safe), 0.0)
+    return -np.sum(terms, axis=axis)
 
 
 def renyi(p: np.ndarray, alpha: float, axis: int = -1) -> np.ndarray:
@@ -132,8 +156,9 @@ def tsallis(p: np.ndarray, q: float, axis: int = -1) -> np.ndarray:
 
 
 def binary_entropy(t: np.ndarray) -> np.ndarray:
-    # GUIDED: use the Shannon functional on (t,1-t).
-    raise NotImplementedError("Milestone 1: implement binary entropy")
+    """Binary entropy h(t) = -t log(t) - (1-t) log(1-t), with 0 log 0 = 0."""
+    t = np.asarray(t, dtype=float)
+    return shannon(np.stack([t, 1.0 - t], axis=-1), axis=-1)
 
 
 def omega_direct_sum_projective(c: float) -> np.ndarray:

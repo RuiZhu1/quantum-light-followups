@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-qa-agent"
+version = "0.1.0"
+description = "AI-assisted test generation agent for scientific Python code"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Rui"},
+]
+keywords = ["ai", "testing", "agent", "qa", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "pytest>=7.0",
+    "pytest-xdist>=3.0",
+    "pytest-json-report>=1.5",
+    "openai>=1.0",
+    "anthropic>=0.30",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "tenacity>=8.0",
+    "structlog>=24.0",
+]
+
+[project.optional-dependencies]
+web = [
+    "fastapi>=0.100",
+    "uvicorn[standard]>=0.23",
+]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.5",
+    "pre-commit>=3.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+ai-qa-agent = "ai_qa_agent.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ai_qa_agent*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B", "C4", "SIM"]
+ignore = ["E501", "E402"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = ["generated_tests/"]
+
+[tool.pytest.ini_options]
+testpaths = ["baseline_tests"]
+addopts = "-q --tb=short"

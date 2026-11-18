@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ai-qa-agent
+  namespace: default
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: ai-qa-agent
+          image: ai-qa-agent:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "main.py", "--client", "placeholder"]
+          env:
+            # Override with real secrets for LLM-backed runs.
+            - name: OPENAI_BASE_URL
+              value: ""
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm-api-keys
+                  key: openai-api-key
+                  optional: true
+            - name: OPENAI_MODEL
+              value: "gpt-4o-mini"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2"
+          volumeMounts:
+            - name: output
+              mountPath: /app/ai_qa_agent/generated_tests
+      volumes:
+        - name: output
+          emptyDir: {}
